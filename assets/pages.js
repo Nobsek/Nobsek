@@ -38,7 +38,7 @@
     w.appendChild(el("p", "lead", "Build a character, pick a scene, play it with friends. A game for adults."));
     var live = el("div", "live"); w.appendChild(live);
     api.stats().then(function (st) {
-      [[st.players, "players"], [st.online, "online now"], [st.vips, "VIP"]].forEach(function (x) { var d = el("div"); d.appendChild(el("b", "", String(x[0]))); d.appendChild(el("span", "", x[1])); live.appendChild(d); });
+      [[st.players, "players"], [st.online, "online now"]].forEach(function (x) { var d = el("div"); d.appendChild(el("b", "", String(x[0]))); d.appendChild(el("span", "", x[1])); live.appendChild(d); });
     });
     var cta = el("div", "cta"); w.appendChild(cta);
     if (me) { var p = el("a", "btn primary big", "Open messages"); p.href = "messages.html"; cta.appendChild(p); }
