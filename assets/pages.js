@@ -163,7 +163,8 @@
   P.player = function (me) {
     var w = section("narrow"); var name = qs("name");
     if (!name) { head(w, "Players", "Pick a player"); var a = el("a", "btn", "See all players"); a.href = "players.html"; w.appendChild(a); return; }
-    api.player(name).then(function (u) {
+    function show() { api.player(name).then(function (u) {
+      w.textContent = "";
       var card = el("div", "panel profile"); w.appendChild(card);
       var ban = el("div", "banner"); if (u.perks && u.perks.banner) { ban.style.background = "linear-gradient(120deg, hsl(" + u.hue + " 55% 45%), hsl(" + ((u.hue + 60) % 360) + " 55% 30%))"; } card.appendChild(ban);
       var tr = el("div", "top-row"); tr.appendChild(N.avatar(u, "big")); var t = el("div"); var h = el("h2", "", u.username); if (u.vip) { h.style.color = "#ffd666"; } t.appendChild(h);
@@ -182,8 +183,14 @@
         var fb = el("button", "btn primary", u.friend ? "Friends ✓" : u.pending ? "Request sent" : "Add friend"); fb.type = "button"; fb.disabled = u.friend || u.pending;
         fb.addEventListener("click", function () { api.addFriend(u.username).then(function (r) { fb.textContent = r === "accepted" ? "Friends ✓" : "Request sent"; fb.disabled = true; }, function (x) { N.toast(x.message); }); }); act.appendChild(fb);
         if (api.report) { act.appendChild(button("Report", "", function () { reportDialog(u.username, { name: u.username }); })); }
+        if (u.staff) {
+          modButtons(act, { username: u.username, role: u.role, banned: u.staff.banned }, me, show, "");
+          card.appendChild(el("p", "label", "Staff only: " + (u.staff.banned ? "banned · " : "") + u.staff.warnings.length + " warning(s)"));
+          u.staff.warnings.forEach(function (x) { card.appendChild(el("p", "quote", x.reason + " (" + x.by + ", " + when(x.at) + (x.seen ? ", read" : ", not read yet") + ")")); });
+        }
       } else { var si = el("a", "btn primary", "Sign in to add friend"); si.href = "auth.html?next=" + encodeURIComponent("player.html?name=" + u.username); act.appendChild(si); }
-    }, function (e) { head(w, "Players", "Not found", e.message); var a = el("a", "btn", "See all players"); a.href = "players.html"; a.style.marginTop = "16px"; w.appendChild(a); });
+    }, function (e) { w.textContent = ""; head(w, "Players", "Not found", e.message); var a = el("a", "btn", "See all players"); a.href = "players.html"; a.style.marginTop = "16px"; w.appendChild(a); }); }
+    show();
   };
 
   /* VIP + COINS */
@@ -258,11 +265,36 @@
     document.body.appendChild(d); d.showModal();
   }
 
+  /* Warn and Ban buttons, only for players ranked below the staff member */
+  function rank(role) { return { mod: 1, admin: 2, owner: 3 }[role] || 0; }
+  function warnDialog(name, preset, done) {
+    var d = el("dialog", "report-box"); var f = el("form"); d.appendChild(f);
+    f.appendChild(el("h3", "", "Warn " + name));
+    var l = el("label", "label", "Reason (the player will read this)"); l.htmlFor = "warn-reason"; f.appendChild(l);
+    var ta = el("textarea", "textarea"); ta.id = "warn-reason"; ta.maxLength = 300; ta.value = preset || ""; f.appendChild(ta);
+    var box = el("div", "error"); box.hidden = true; box.setAttribute("role", "alert"); f.appendChild(box);
+    var row = el("div", "actions-row"); var ok = el("button", "btn primary", "Send warning"); ok.type = "submit"; row.appendChild(ok); row.appendChild(button("Cancel", "", function () { d.close(); })); f.appendChild(row);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault(); ok.disabled = true; box.hidden = true;
+      api.warn(name, ta.value).then(function () { d.close(); N.toast("Warning sent"); if (done) { done(); } }, function (x) { ok.disabled = false; err(box, x); });
+    });
+    d.addEventListener("close", function () { d.remove(); });
+    document.body.appendChild(d); d.showModal();
+  }
+  function modButtons(row, u, me, done, cls) {
+    if (!api.warn || u.username === me.username || rank(me.role) <= rank(u.role)) { return; }
+    row.appendChild(button("Warn", cls, function () { warnDialog(u.username, "", done); }));
+    if (rank(me.role) >= 2) {
+      row.appendChild(button(u.banned ? "Unban" : "Ban", cls, function () {
+        if (confirm(u.banned ? "Unban " + u.username + " and their connection?" : "Ban " + u.username + " and their connection (IP)? Other people on the same connection will be blocked too.")) { api.setBan(u.username, !u.banned).then(function () { N.toast(u.banned ? "Unbanned" : "Banned"); done(); }, function (x) { N.toast(x.message); }); }
+      }));
+    }
+  }
+
   P.reports = function (me) {
     var w = section(); head(w, "Staff", "Reports", "What members reported. Open one to read the messages and act on it.");
     if (!me) { signedOutNotice(w); return; }
     if (!api.reports || ["mod", "admin", "owner"].indexOf(me.role) < 0) { var n = el("div", "notice"); n.appendChild(el("p", "", "This page is for staff.")); w.appendChild(n); return; }
-    var boss = me.role === "admin" || me.role === "owner";
     var view = el("div"); w.appendChild(view);
     var status = "open";
     function profile(name) { var a = el("a", "", name); a.href = "player.html?name=" + encodeURIComponent(name); return a; }
@@ -308,7 +340,7 @@
         var kv = el("dl", "kv");
         function line(k, v) { kv.appendChild(el("dt", "", k)); var dd = el("dd"); dd.appendChild(typeof v === "string" ? document.createTextNode(v) : v); kv.appendChild(dd); }
         line("Reason", reasonText(r.reason)); line("Details", r.details || "None given"); line("Reported by", profile(r.reporter)); line("Sent", when(r.created));
-        line("Reports about this player", String(t.reports)); line("Status", r.status + (r.handler ? " by " + r.handler + ", " + when(r.handledAt) : ""));
+        line("Reports about this player", String(t.reports)); line("Warnings", String(t.warnings)); line("Status", r.status + (r.handler ? " by " + r.handler + ", " + when(r.handledAt) : ""));
         card.appendChild(kv);
         if (r.message) { card.appendChild(el("p", "label", "Reported message")); card.appendChild(el("p", "quote", r.message.text)); }
         var l = el("label", "label", "Staff note"); l.htmlFor = "report-note"; card.appendChild(l);
@@ -317,9 +349,8 @@
         function set(s) { api.closeReport(id, s, note.value).then(function () { N.toast("Saved"); showOne(id); }, fail); }
         if (r.status === "open") { row.appendChild(button("Mark resolved", "primary", function () { set("resolved"); })); row.appendChild(button("Dismiss", "", function () { set("dismissed"); })); }
         else { row.appendChild(button("Reopen", "", function () { set("open"); })); }
-        if (boss && t.username !== me.username && t.role !== "owner" && (t.role !== "admin" || me.role === "owner")) {
-          row.appendChild(button(t.banned ? "Unban player" : "Ban player", "", function () { if (confirm((t.banned ? "Unban " : "Ban and sign out ") + t.username + "?")) { api.setBan(t.username, !t.banned).then(function () { showOne(id); }, fail); } }));
-        }
+        modButtons(row, t, me, function () { showOne(id); }, "");
+        if (r.reporter !== me.username) { row.appendChild(button("Warn reporter (false report)", "", function () { warnDialog(r.reporter, "You sent a false report about " + t.username + "."); })); }
         function reload() { showOne(id); }
         if (r.message) {
           view.appendChild(el("h3", "report-h", "Conversation around the reported message"));
@@ -346,7 +377,7 @@
     var box = el("div", "scroll-x"); w.appendChild(box);
     function draw() {
       api.adminUsers().then(function (us) {
-        box.textContent = ""; var t = el("table", "table"); var th = el("thead"); var hr = el("tr"); ["Player", "Role", "Coins", "Give coins", ""].forEach(function (h) { hr.appendChild(el("th", "", h)); }); th.appendChild(hr); t.appendChild(th);
+        box.textContent = ""; var t = el("table", "table"); var th = el("thead"); var hr = el("tr"); ["Player", "Role", "Coins", "Give coins", "", "Warnings", "Moderation"].forEach(function (h) { hr.appendChild(el("th", "", h)); }); th.appendChild(hr); t.appendChild(th);
         var tb = el("tbody"); us.forEach(function (u) {
           var tr = el("tr"); var c1 = el("td"); var a = el("a", "", u.username); a.href = "player.html?name=" + encodeURIComponent(u.username); c1.appendChild(a); if (u.seed) { c1.appendChild(document.createTextNode(" ")); c1.appendChild(el("span", "badge example", "example")); } tr.appendChild(c1);
           var c2 = el("td"); var sel = el("select", "select"); sel.setAttribute("aria-label", "Role of " + u.username); api.ROLES.forEach(function (r) { var o = el("option", "", r); o.value = r; if (r === u.role) { o.selected = true; } sel.appendChild(o); });
@@ -354,6 +385,9 @@
           tr.appendChild(el("td", "", String(u.coins)));
           var c4 = el("td"); var amt = el("input", "input"); amt.type = "number"; amt.placeholder = "+/-"; amt.style.width = "90px"; amt.style.minHeight = "34px"; amt.setAttribute("aria-label", "Coins for " + u.username); c4.appendChild(amt); tr.appendChild(c4);
           var c5 = el("td"); var gb = el("button", "btn small", "Apply"); gb.type = "button"; gb.addEventListener("click", function () { api.grantCoins(u.username, amt.value).then(function () { N.toast("Coins updated"); draw(); }, function (x) { N.toast(x.message); }); }); c5.appendChild(gb); tr.appendChild(c5);
+          if (u.banned) { c1.appendChild(document.createTextNode(" ")); c1.appendChild(el("span", "badge admin", "banned")); }
+          tr.appendChild(el("td", "", String(u.warnings || 0)));
+          var c7 = el("td"); var mods = el("div", "mod-row"); modButtons(mods, u, me, draw, "small"); c7.appendChild(mods); tr.appendChild(c7);
           tb.appendChild(tr);
         });
         t.appendChild(tb); box.appendChild(t);
@@ -378,16 +412,24 @@
   /* PLAY: the list of game servers */
   P.play = function (me) {
     var w = section(); head(w, "Play", "Choose a server", "Pick a server to enter the game. Press Esc in the game to leave.");
-    var game = "https://nobsek-play.nobsek.workers.dev/";
+    var game = "game/index.html";
+    var ws = (window.NOBSEK && window.NOBSEK.ws) || "";
+    var avatarApi = (window.NOBSEK && window.NOBSEK.avatarApi) || "";
     var card = el("div", "notice"); card.appendChild(el("h3", "", "Main server"));
-    var count = el("p", "", "Checking the server..."); card.appendChild(count);
-    var join = el("a", "btn primary", "Join"); join.href = game + (me ? "?name=" + encodeURIComponent(me.username) : ""); card.appendChild(join); w.appendChild(card);
-    function refresh() {
-      fetch(game + "status", { cache: "no-store" }).then(function (r) { if (!r.ok) { throw new Error(); } return r.json(); })
-        .then(function (s) { count.textContent = s.online + " / " + s.max + " players" + (s.online >= s.max ? " (full)" : ""); },
-          function () { count.textContent = "Player count unavailable."; });
+    var count = el("p", "", "Web version — click Join, then press Enter in game to load your avatar."); card.appendChild(count);
+    var join = el("a", "btn primary", "Join");
+    var avatar = el("input", "input"); avatar.type = "text"; avatar.placeholder = "Avatar username or numeric id (optional)"; avatar.value = me ? me.username : ""; avatar.setAttribute("aria-label", "Avatar username or id");
+    card.appendChild(avatar); card.appendChild(join); w.appendChild(card);
+    function updateJoin() {
+      var who = avatar.value.trim() || (me ? me.username : "");
+      var q = [];
+      if (who) q.push("name=" + encodeURIComponent(who));
+      if (ws) q.push("ws=" + encodeURIComponent(ws));
+      if (avatarApi) q.push("api=" + encodeURIComponent(avatarApi));
+      join.href = game + (q.length ? "?" + q.join("&") : "");
     }
-    refresh(); setInterval(refresh, 10000);
+    avatar.addEventListener("input", updateJoin);
+    updateJoin();
   };
 
   P.rules = function () {
@@ -396,7 +438,7 @@
   };
   P.terms = function () {
     var w = section(); head(w, "Terms", "Terms of use", "Last updated 2026-11-22.");
-    html(w.appendChild(el("div", "prose")), "<h3>Using the site</h3><p>By creating an account you confirm you are at least 18 years old and accept these terms and the rules. You are responsible for what you do with your account.</p><h3>Your data</h3><p>We keep your username, email and activity on the site so it can work. We do not sell it. You can ask for your account to be deleted at any time.</p><h3>Perks and coins</h3><p>Coins and VIP have no cash value and cannot be exchanged. Perks can change or end if the rules are broken.</p><h3>Changes</h3><p>These terms can change. Continuing to use the site means you accept the new version.</p><p class=\"muted\">Draft text: have it reviewed before the site goes public.</p>");
+    html(w.appendChild(el("div", "prose")), "<h3>Using the site</h3><p>By creating an account you confirm you are at least 18 years old and accept these terms and the rules. You are responsible for what you do with your account.</p><h3>Your data</h3><p>We keep your username, email, activity on the site and a scrambled form of your connection (IP) address so it can work and to enforce bans. We do not sell it. You can ask for your account to be deleted at any time.</p><h3>Perks and coins</h3><p>Coins and VIP have no cash value and cannot be exchanged. Perks can change or end if the rules are broken.</p><h3>Changes</h3><p>These terms can change. Continuing to use the site means you accept the new version.</p><p class=\"muted\">Draft text: have it reviewed before the site goes public.</p>");
   };
 
   document.addEventListener("nobsek-ready", function (e) {

@@ -144,6 +144,21 @@
       $("#gateYes").focus();
     }
 
+    /* staff warnings: shown until the player clicks "I understand" */
+    var pending = (me && me.warnings) || [];
+    function showWarning(i) {
+      if (i >= pending.length) { return; }
+      var d = el("dialog", "report-box"); d.appendChild(el("h3", "", "Warning from the staff")); d.appendChild(el("p", "quote", pending[i].reason));
+      d.appendChild(el("p", "report-warn", "Breaking the rules again can get your account banned."));
+      var ok = el("button", "btn primary", "I understand"); ok.type = "button"; ok.style.marginTop = "18px"; d.appendChild(ok);
+      d.addEventListener("cancel", function (e) { e.preventDefault(); });
+      ok.addEventListener("click", function () { ok.disabled = true; api.warningSeen(pending[i].id).then(function () { d.close(); d.remove(); showWarning(i + 1); }, function (x) { ok.disabled = false; toast(x.message); }); });
+      document.body.appendChild(d); d.showModal();
+    }
+    /* the 18+ window comes first: a modal dialog would cover it */
+    var gateBox = $("#gate");
+    if (gateBox) { $("#gateYes").addEventListener("click", function () { showWarning(0); }); } else { showWarning(0); }
+
     document.dispatchEvent(new CustomEvent("nobsek-ready", { detail: me }));
   }
 

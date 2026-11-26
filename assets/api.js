@@ -47,6 +47,8 @@
     reportDetail: function (id) { return call("GET", "/api/reports/" + enc(id)); },
     closeReport: function (id, status, note) { return call("POST", "/api/reports/" + enc(id), { status: status, note: note }); },
     setBan: function (name, banned) { return call("POST", "/api/admin/ban", { name: name, banned: banned }); },
+    warn: function (name, reason) { return call("POST", "/api/mod/warn", { name: name, reason: reason }); },
+    warningSeen: function (id) { return call("POST", "/api/warnings/seen", { id: id }); },
     setRole: function (name, role) { return call("POST", "/api/admin/role", { name: name, role: role }); },
     grantCoins: function (name, amount) { return call("POST", "/api/admin/coins", { name: name, amount: amount }); }
   };
