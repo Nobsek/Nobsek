@@ -143,7 +143,10 @@
 
   /* the sign-in gate for pages that need an account */
   var NEEDS_ACCOUNT = { messages: 1, friends: 1, admin: 1 };
-  api.me().catch(function () { return null; }).then(function (me) {
+  /* wait until every script has run: the real server can answer before pages.js is listening */
+  var loaded = new Promise(function (done) { if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", done); } else { done(); } });
+  Promise.all([api.me().catch(function () { return null; }), loaded]).then(function (r) {
+    var me = r[0];
     build(me);
     if (NEEDS_ACCOUNT[page] && !me) { document.dispatchEvent(new CustomEvent("nobsek-signedout")); }
   });
