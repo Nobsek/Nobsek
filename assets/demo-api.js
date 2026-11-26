@@ -85,20 +85,6 @@
     players: function (q) { var d = load(); q = String(q || "").toLowerCase(); return wait(d.users.filter(function (u) { return !q || u.username.toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { return b.last - a.last; }).map(clean)); },
     player: function (name) { return guard(function () { var d = load(), u = byName(d, name); if (!u) { throw new Error("No such player."); } var m = current(d), o = clean(u); o.online = now() - u.last < 15 * 60000; o.friend = !!(m && m.friends.indexOf(u.id) >= 0); o.pending = !!(m && u.requests.indexOf(m.id) >= 0); o.self = !!(m && m.id === u.id); return o; }); },
     updateProfile: function (f) { return guard(function () { var d = load(), m = need(d); m.bio = String(f.bio || "").slice(0, 280); if (f.hue != null && (m.perks.color || m.role !== "player")) { m.hue = f.hue; } save(d); return clean(m); }); },
-    setAvatar: function (who) {
-      return guard(function () {
-        var d = load(), m = need(d); who = String(who || "").trim();
-        if (!who) { m.avatar = null; save(d); return clean(m); }
-        return fetch("https://users.roblox.com/v1/usernames/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usernames: [who] }) }).then(function (r) { return r.json(); }).then(function (j) {
-          var id = /^\d+$/.test(who) ? who : (j.data && j.data[0] && j.data[0].id);
-          if (!id) { throw new Error("No Roblox user with that name or id."); }
-          return fetch("https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" + id + "&size=150x150&format=Png&isCircular=false").then(function (r) { return r.json(); });
-        }).then(function (t) {
-          var it = t.data && t.data[0]; if (!it || !it.imageUrl) { throw new Error("No picture available for that user."); }
-          m.avatar = it.imageUrl; save(d); return clean(m);
-        }, function (e) { if (e instanceof TypeError) { throw new Error("The demo cannot reach Roblox from here. This works once the server is connected."); } throw e; });
-      });
-    },
     friends: function () { return guard(function () { var d = load(), m = need(d); function pick(ids) { return ids.map(function (id) { return d.users.filter(function (u) { return u.id === id; })[0]; }).filter(Boolean).map(clean); } return { friends: pick(m.friends), requests: pick(m.requests) }; }); },
     addFriend: function (name) {
       return guard(function () {

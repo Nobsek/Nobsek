@@ -30,7 +30,6 @@
     players: function (q) { return call("GET", "/api/players?q=" + enc(q || "")); },
     player: function (name) { return call("GET", "/api/player/" + enc(name)); },
     updateProfile: function (f) { return call("POST", "/api/profile", f); },
-    setAvatar: function (robloxName) { return call("POST", "/api/profile/avatar", { robloxName: robloxName }); },
     friends: function () { return call("GET", "/api/friends"); },
     addFriend: function (name) { return call("POST", "/api/friends/add", { name: name }); },
     declineFriend: function (name) { return call("POST", "/api/friends/decline", { name: name }); },

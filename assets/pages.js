@@ -173,17 +173,6 @@
       var act = el("div", "actions-row"); card.appendChild(act);
       if (u.self) {
         var form = el("form"); form.style.marginTop = "22px"; form.appendChild(el("label", "label", "Your bio")); var ta = el("textarea", "textarea"); ta.value = u.bio || ""; ta.maxLength = 280; form.appendChild(ta);
-        form.appendChild(el("p", "label", "Profile picture")); form.lastChild.style.marginTop = "18px";
-        var pic = el("div", "pic-row"); var who = el("input", "input"); who.placeholder = "Roblox username or user id"; who.setAttribute("aria-label", "Roblox username or user id"); pic.appendChild(who);
-        var use = el("button", "btn", "Use this picture"); use.type = "button"; pic.appendChild(use);
-        var rm = el("button", "btn", "Remove picture"); rm.type = "button"; rm.hidden = !u.avatar; pic.appendChild(rm); form.appendChild(pic);
-        form.appendChild(el("p", "hint", "We take the Roblox avatar picture of that account. You can change or remove it any time."));
-        function applyAvatar(name) {
-          use.disabled = rm.disabled = true;
-          api.setAvatar(name).then(function (res) { u.avatar = res.avatar; N.fillAvatar($(".profile .avatar.big"), u); rm.hidden = !res.avatar; who.value = ""; N.toast(res.avatar ? "Picture updated" : "Picture removed"); }, function (x) { N.toast(x.message); }).then(function () { use.disabled = rm.disabled = false; });
-        }
-        use.addEventListener("click", function () { if (!who.value.trim()) { N.toast("Type a Roblox username or id first"); return; } applyAvatar(who.value); });
-        rm.addEventListener("click", function () { applyAvatar(""); });
         var hue = u.hue;
         if (me.vip || (u.perks && u.perks.color)) { form.appendChild(el("p", "label", "Avatar colour")); form.lastChild.style.marginTop = "14px"; var sw = el("div", "swatches"); [10, 45, 130, 190, 262, 320].forEach(function (hh) { var b = el("button", "swatch"); b.type = "button"; b.style.background = "hsl(" + hh + " 55% 80%)"; b.setAttribute("aria-label", "Colour " + hh); b.setAttribute("aria-pressed", String(hh === hue)); b.addEventListener("click", function () { hue = hh; $$(".swatch", sw).forEach(function (o) { o.setAttribute("aria-pressed", "false"); }); b.setAttribute("aria-pressed", "true"); }); sw.appendChild(b); }); form.appendChild(sw); }
         else { form.appendChild(el("p", "hint", "Avatar colour: buy it in the VIP shop.")); }
