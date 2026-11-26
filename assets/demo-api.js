@@ -13,8 +13,6 @@
   ];
   var ROOMS = [
     { id: "general", name: "General", about: "Say hello" },
-    { id: "looks", name: "Looks", about: "Share look codes" },
-    { id: "help", name: "Help", about: "Questions about the game" },
     { id: "vip", name: "VIP lounge", about: "Supporters only", vip: true }
   ];
   function now() { return Date.now(); }
@@ -34,7 +32,7 @@
       ],
       msgs: []
     };
-    var lines = [["Nobsek", "general", "Welcome! This is the demo of the site: accounts here stay in your browser."], ["Aria", "general", "Say hello in General."], ["Kestrel", "looks", "Posting my look code later today."], ["Milo", "help", "Press G in game to take out the grab tool."], ["Kestrel", "vip", "Thanks for the support, everyone."]];
+    var lines = [["Nobsek", "general", "Welcome! This is the demo of the site: accounts here stay in your browser."], ["Aria", "general", "Say hello in General."], ["Kestrel", "vip", "Thanks for the support, everyone."]];
     lines.forEach(function (l, i) { d.msgs.push({ id: "m" + i, room: l[1], user: l[0], text: l[2], at: t - (lines.length - i) * h }); });
     save(d); return d;
   }
