@@ -41,8 +41,7 @@
     });
     var cta = el("div", "cta"); w.appendChild(cta);
     var go = el("a", "btn primary big", "Play"); go.href = "play.html"; cta.appendChild(go);
-    if (me) { var p = el("a", "btn primary big", "Open messages"); p.href = "messages.html"; cta.appendChild(p); }
-    else { var r = el("a", "btn primary big", "Create an account"); r.href = "auth.html?mode=register"; cta.appendChild(r); var l = el("a", "btn big", "Sign in"); l.href = "auth.html"; cta.appendChild(l); }
+    if (!me) { var r = el("a", "btn big", "Create an account"); r.href = "auth.html?mode=register"; cta.appendChild(r); var l = el("a", "btn big", "Sign in"); l.href = "auth.html"; cta.appendChild(l); }
     var how = el("section", "how"); var hw = el("div", "wrap"); how.appendChild(hw); s.parentNode.insertBefore(how, s.nextSibling);
     var doors = el("div", "doors"); hw.appendChild(doors);
     var ICON = {
