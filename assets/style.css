@@ -282,3 +282,26 @@ section.page.narrow { max-width: 620px; margin-inline: auto; width: 100%; }
 .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
 .pic-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 .pic-row .input { flex: 1; min-width: 180px; }
+
+/* reports */
+.msg .more + .more { margin-left: 0; }
+.count { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--negative); color: #1b0a10; font-size: 12px; font-weight: 700; line-height: 20px; }
+.report-box { width: min(440px, calc(100vw - 32px)); padding: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--stroke); border-radius: var(--r-window); }
+.report-box::backdrop { background: rgba(8, 8, 15, 0.75); }
+.report-box h3 { margin: 0 0 8px; }
+.report-box .label, .panel .label { display: block; margin-top: 16px; }
+.report-box .actions-row { margin-top: 18px; }
+.report-tabs { max-width: 260px; margin-top: 24px; }
+.report-list, .report-msgs { display: grid; gap: 10px; margin-top: 16px; }
+.report-row { display: grid; gap: 4px; padding: 14px 16px; text-align: left; background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--r-panel); color: var(--text); font: 400 15px var(--font); cursor: pointer; }
+.report-row:hover { background: var(--raised); }
+.report-row small { color: var(--muted); }
+.quote { margin: 6px 0 0; padding-left: 12px; border-left: 3px solid var(--accent); white-space: pre-wrap; overflow-wrap: anywhere; color: #ddd9f5; }
+.report-back { margin: 22px 0 14px; }
+.report-h { margin: 28px 0 0; }
+.report-msg { padding: 12px 16px; background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--r-panel); }
+.report-msg.marked { border-color: var(--negative); }
+.report-msg .who { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 650; }
+.report-msg time { color: var(--muted); font-size: 12px; font-weight: 400; }
+.report-msg .btn { margin-left: auto; }
+.report-msg .body { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }

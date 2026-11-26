@@ -35,7 +35,6 @@
   P.index = function (me) {
     var s = el("section", "home"); var w = el("div", "wrap"); s.appendChild(w); app.appendChild(s);
     w.appendChild(el("h1", "", "Nobsek"));
-    w.appendChild(el("p", "lead", "Build a character, pick a scene, play it with friends. A game for adults."));
     var live = el("div", "live"); w.appendChild(live);
     api.stats().then(function (st) {
       [[st.players, "players"], [st.online, "online now"]].forEach(function (x) { var d = el("div"); d.appendChild(el("b", "", String(x[0]))); d.appendChild(el("span", "", x[1])); live.appendChild(d); });
@@ -44,11 +43,6 @@
     if (me) { var p = el("a", "btn primary big", "Open messages"); p.href = "messages.html"; cta.appendChild(p); }
     else { var r = el("a", "btn primary big", "Create an account"); r.href = "auth.html?mode=register"; cta.appendChild(r); var l = el("a", "btn big", "Sign in"); l.href = "auth.html"; cta.appendChild(l); }
     var how = el("section", "how"); var hw = el("div", "wrap"); how.appendChild(hw); s.parentNode.insertBefore(how, s.nextSibling);
-    hw.appendChild(el("h2", "", "How it works"));
-    var st = el("div", "steps3"); hw.appendChild(st);
-    [["Create a free account", "Pick a username and confirm you are 18 or older. It takes a minute."], ["Set up your profile", "Write a short bio and choose your picture."], ["Meet people", "Chat with the community and add friends."]].forEach(function (x) {
-      var c = el("div", "step"); c.appendChild(el("h3", "", x[0])); c.appendChild(el("p", "", x[1])); st.appendChild(c);
-    });
     var doors = el("div", "doors"); hw.appendChild(doors);
     var ICON = {
       chat: '<path d="M4 5h16v11H9l-5 4z"/>', people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6"/><path d="M16 5a3.5 3.5 0 010 7M18 14c2.5.6 3.5 2.6 3.5 6"/>',
@@ -59,9 +53,6 @@
       var a = el("a", "door"); a.href = d[0]; var ic = el("span", "ico"); ic.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[d[1]] + "</svg>"; a.appendChild(ic);
       var t = el("span"); t.appendChild(el("strong", "", d[2])); t.appendChild(el("small", "", d[3])); a.appendChild(t); doors.appendChild(a);
     });
-    var about = el("details", "about-box"); about.appendChild(el("summary", "", "What is Nobsek?"));
-    about.appendChild(el("p", "", "Nobsek is a game with a character editor, a library of 300+ scenes, soft-body physics and a grab tool, running on the Nobsek engine. This site is where you chat, find friends and manage your VIP perks."));
-    hw.appendChild(about);
     var links = el("div", "links"); hw.appendChild(links);
     if (cfg.links.discord) { var dl = el("a", "", "Discord"); dl.href = cfg.links.discord; dl.target = "_blank"; dl.rel = "noopener"; links.appendChild(dl); }
     [["rules.html", "Rules"], ["terms.html", "Terms"]].forEach(function (x) { var a = el("a", "", x[1]); a.href = x[0]; links.appendChild(a); });
@@ -125,6 +116,7 @@
         var row = el("div", "msg"); row.appendChild(N.avatar(m)); var b = el("div"); var who = el("div", "who");
         var a = el("a", "", m.user); a.href = "player.html?name=" + encodeURIComponent(m.user); if (m.vip) { a.style.color = "#ffd666"; } who.appendChild(a); who.appendChild(N.badges(m)); who.appendChild(el("time", "", N.ago(m.at)));
         if (m.user === me.username || me.role === "mod" || me.role === "admin" || me.role === "owner") { var x = el("button", "more", "Delete"); x.type = "button"; x.addEventListener("click", function () { api.deleteMessage(m.id).then(load); }); who.appendChild(x); }
+        if (api.report && m.user !== me.username) { var rp = el("button", "more", "Report"); rp.type = "button"; rp.addEventListener("click", function () { reportDialog("a message by " + m.user, { messageId: m.id }); }); who.appendChild(rp); }
         b.appendChild(who); b.appendChild(el("p", "body", m.text)); row.appendChild(b); log.appendChild(row);
       });
       log.scrollTop = log.scrollHeight;
@@ -201,6 +193,7 @@
       } else if (me) {
         var fb = el("button", "btn primary", u.friend ? "Friends ✓" : u.pending ? "Request sent" : "Add friend"); fb.type = "button"; fb.disabled = u.friend || u.pending;
         fb.addEventListener("click", function () { api.addFriend(u.username).then(function (r) { fb.textContent = r === "accepted" ? "Friends ✓" : "Request sent"; fb.disabled = true; }, function (x) { N.toast(x.message); }); }); act.appendChild(fb);
+        if (api.report) { act.appendChild(button("Report", "", function () { reportDialog(u.username, { name: u.username }); })); }
       } else { var si = el("a", "btn primary", "Sign in to add friend"); si.href = "auth.html?next=" + encodeURIComponent("player.html?name=" + u.username); act.appendChild(si); }
     }, function (e) { head(w, "Players", "Not found", e.message); var a = el("a", "btn", "See all players"); a.href = "players.html"; a.style.marginTop = "16px"; w.appendChild(a); });
   };
@@ -253,6 +246,105 @@
     });
   };
 
+  /* REPORTS */
+  var REASONS = [["harassment", "Harassment, hate or threats"], ["spam", "Spam or scam"], ["underage", "Seems under 18"], ["impersonation", "Pretends to be someone else"], ["other", "Something else"]];
+  var ROOM_NAMES = { general: "General", vip: "VIP lounge" };
+  function reasonText(id) { var r = REASONS.filter(function (x) { return x[0] === id; })[0]; return r ? r[1] : id; }
+  function when(t) { return new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+  function button(text, cls, fn) { var b = el("button", "btn " + (cls || ""), text); b.type = "button"; b.addEventListener("click", fn); return b; }
+  function reportDialog(what, data) {
+    var d = el("dialog", "report-box"); var f = el("form"); d.appendChild(f);
+    f.appendChild(el("h3", "", "Report " + what));
+    var l = el("label", "label", "Reason"); l.htmlFor = "report-reason"; f.appendChild(l);
+    var sel = el("select", "select"); sel.id = "report-reason"; REASONS.forEach(function (r) { var o = el("option", "", r[1]); o.value = r[0]; sel.appendChild(o); }); f.appendChild(sel);
+    var l2 = el("label", "label", "Details (optional)"); l2.htmlFor = "report-details"; f.appendChild(l2);
+    var ta = el("textarea", "textarea"); ta.id = "report-details"; ta.maxLength = 500; f.appendChild(ta);
+    var box = el("div", "error"); box.hidden = true; box.setAttribute("role", "alert"); f.appendChild(box);
+    var row = el("div", "actions-row"); var ok = el("button", "btn primary", "Send report"); ok.type = "submit"; row.appendChild(ok); row.appendChild(button("Cancel", "", function () { d.close(); })); f.appendChild(row);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault(); ok.disabled = true; box.hidden = true;
+      api.report(Object.assign({ reason: sel.value, details: ta.value }, data)).then(function () { d.close(); N.toast("Report sent. Thank you."); }, function (x) { ok.disabled = false; err(box, x); });
+    });
+    d.addEventListener("close", function () { d.remove(); });
+    document.body.appendChild(d); d.showModal();
+  }
+
+  P.reports = function (me) {
+    var w = section(); head(w, "Staff", "Reports", "What members reported. Open one to read the messages and act on it.");
+    if (!me) { signedOutNotice(w); return; }
+    if (!api.reports || ["mod", "admin", "owner"].indexOf(me.role) < 0) { var n = el("div", "notice"); n.appendChild(el("p", "", "This page is for staff.")); w.appendChild(n); return; }
+    var boss = me.role === "admin" || me.role === "owner";
+    var view = el("div"); w.appendChild(view);
+    var status = "open";
+    function profile(name) { var a = el("a", "", name); a.href = "player.html?name=" + encodeURIComponent(name); return a; }
+    function fail(e) { N.toast(e.message); }
+
+    function showList() {
+      view.textContent = "";
+      var seg = el("div", "seg report-tabs"); [["open", "Open"], ["closed", "Closed"]].forEach(function (x) { var b = el("button", "", x[1]); b.type = "button"; b.setAttribute("aria-selected", String(status === x[0])); b.addEventListener("click", function () { status = x[0]; showList(); }); seg.appendChild(b); }); view.appendChild(seg);
+      var list = el("div", "report-list"); view.appendChild(list); list.appendChild(el("p", "muted", "Loading..."));
+      var asked = status;
+      api.reports(asked).then(function (r) {
+        if (asked !== status) { return; }
+        list.textContent = "";
+        if (!r.reports.length) { list.appendChild(el("p", "muted", status === "open" ? "No open reports." : "No closed reports yet.")); return; }
+        r.reports.forEach(function (x) {
+          var b = el("button", "report-row"); b.type = "button";
+          b.appendChild(el("strong", "", x.target + " · " + reasonText(x.reason)));
+          b.appendChild(el("small", "", "Reported by " + x.reporter + " · " + N.ago(x.created) + (x.status !== "open" ? " · " + x.status + (x.handler ? " by " + x.handler : "") : "")));
+          if (x.message) { b.appendChild(el("span", "quote", x.message.text)); } else if (x.details) { b.appendChild(el("span", "quote", x.details)); }
+          b.addEventListener("click", function () { showOne(x.id); }); list.appendChild(b);
+        });
+      }, function (e) { list.textContent = e.message; });
+    }
+
+    function messageList(items, marked, reload) {
+      var box = el("div", "report-msgs");
+      if (!items.length) { box.appendChild(el("p", "muted", "No messages.")); return box; }
+      items.forEach(function (m) {
+        var row = el("div", "report-msg" + (m.id === marked ? " marked" : "")); var top = el("div", "who"); top.appendChild(profile(m.user));
+        top.appendChild(el("time", "", (ROOM_NAMES[m.room] || m.room) + " · " + when(m.at)));
+        top.appendChild(button("Delete", "small", function () { if (confirm("Delete this message by " + m.user + "?")) { api.deleteMessage(m.id).then(reload, fail); } }));
+        row.appendChild(top); row.appendChild(el("p", "body", m.text)); box.appendChild(row);
+      });
+      return box;
+    }
+
+    function showOne(id) {
+      api.reportDetail(id).then(function (d) {
+        var r = d.report, t = d.target; view.textContent = "";
+        view.appendChild(button("‹ All reports", "small report-back", showList));
+        var card = el("div", "panel"); view.appendChild(card);
+        var h = el("h3", "", t.username + " "); h.appendChild(N.badges(t)); if (t.banned) { h.appendChild(el("span", "badge admin", "banned")); } card.appendChild(h);
+        var kv = el("dl", "kv");
+        function line(k, v) { kv.appendChild(el("dt", "", k)); var dd = el("dd"); dd.appendChild(typeof v === "string" ? document.createTextNode(v) : v); kv.appendChild(dd); }
+        line("Reason", reasonText(r.reason)); line("Details", r.details || "None given"); line("Reported by", profile(r.reporter)); line("Sent", when(r.created));
+        line("Reports about this player", String(t.reports)); line("Status", r.status + (r.handler ? " by " + r.handler + ", " + when(r.handledAt) : ""));
+        card.appendChild(kv);
+        if (r.message) { card.appendChild(el("p", "label", "Reported message")); card.appendChild(el("p", "quote", r.message.text)); }
+        var l = el("label", "label", "Staff note"); l.htmlFor = "report-note"; card.appendChild(l);
+        var note = el("textarea", "textarea"); note.id = "report-note"; note.maxLength = 500; note.value = r.note || ""; card.appendChild(note);
+        var row = el("div", "actions-row"); card.appendChild(row);
+        function set(s) { api.closeReport(id, s, note.value).then(function () { N.toast("Saved"); showOne(id); }, fail); }
+        if (r.status === "open") { row.appendChild(button("Mark resolved", "primary", function () { set("resolved"); })); row.appendChild(button("Dismiss", "", function () { set("dismissed"); })); }
+        else { row.appendChild(button("Reopen", "", function () { set("open"); })); }
+        if (boss && t.username !== me.username && t.role !== "owner" && (t.role !== "admin" || me.role === "owner")) {
+          row.appendChild(button(t.banned ? "Unban player" : "Ban player", "", function () { if (confirm((t.banned ? "Unban " : "Ban and sign out ") + t.username + "?")) { api.setBan(t.username, !t.banned).then(function () { showOne(id); }, fail); } }));
+        }
+        function reload() { showOne(id); }
+        if (r.message) {
+          view.appendChild(el("h3", "report-h", "Conversation around the reported message"));
+          if (!d.context.some(function (m) { return m.id === r.message.id; })) { view.appendChild(el("p", "muted", "The reported message has been deleted. Its text is kept above.")); }
+          view.appendChild(messageList(d.context, r.message.id, reload));
+        }
+        view.appendChild(el("h3", "report-h", "Latest messages by " + t.username));
+        view.appendChild(messageList(d.recent, r.message && r.message.id, reload));
+        window.scrollTo(0, 0);
+      }, fail);
+    }
+    showList();
+  };
+
   /* ADMIN */
   P.admin = function (me) {
     var w = section(); head(w, "Admin", "Players and roles");
@@ -284,12 +376,11 @@
 
   /* TEXT PAGES */
   var FAQ = [
-    ["Why create an account?", "To chat in Messages, add friends and use your coins and VIP perks."],
     ["Is it free?", "Yes. VIP is optional and only adds cosmetic perks."],
     ["Who can play?", "Adults only (18+). The game and this site are not for minors."],
     ["How do I get VIP?", "Support Nobsek on Patreon, or buy a VIP pass with coins in the VIP shop."],
     ["How do I earn coins?", "Claim your daily coins on the VIP page."],
-    ["How do I report someone?", "Tell a moderator in Messages or on Discord. See the rules."]
+    ["How do I report someone?", "Press Report next to their message, or on their profile. Staff review every report."]
   ];
   P.faq = function () {
     var w = section(); head(w, "FAQ", "Quick answers"); var f = el("div", "faq"); w.appendChild(f);

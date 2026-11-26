@@ -43,6 +43,11 @@
     claimDaily: function () { return call("POST", "/api/daily", {}); },
     buy: function (id) { return call("POST", "/api/buy", { id: id }); },
     adminUsers: function () { return call("GET", "/api/admin/users"); },
+    report: function (f) { return call("POST", "/api/reports", f); },
+    reports: function (status) { return call("GET", "/api/reports?status=" + enc(status || "open")); },
+    reportDetail: function (id) { return call("GET", "/api/reports/" + enc(id)); },
+    closeReport: function (id, status, note) { return call("POST", "/api/reports/" + enc(id), { status: status, note: note }); },
+    setBan: function (name, banned) { return call("POST", "/api/admin/ban", { name: name, banned: banned }); },
     setRole: function (name, role) { return call("POST", "/api/admin/role", { name: name, role: role }); },
     grantCoins: function (name, amount) { return call("POST", "/api/admin/coins", { name: name, amount: amount }); }
   };

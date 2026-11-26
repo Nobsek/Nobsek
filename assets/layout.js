@@ -91,6 +91,10 @@
       item("My profile", "player.html?name=" + encodeURIComponent(me.username));
       item("Friends", "friends.html");
       item("VIP and coins", "vip.html");
+      if (api.reports && (me.role === "mod" || me.role === "admin" || me.role === "owner")) {
+        item("Reports", "reports.html"); var rep = menu.lastChild;
+        api.reports("open").then(function (r) { if (r.open) { rep.textContent = "Reports (" + r.open + ")"; btn.appendChild(el("span", "count", String(r.open))); } }, function () { /* the page shows the error */ });
+      }
       if (me.role === "admin" || me.role === "owner") { item("Admin", "admin.html"); }
       var out = el("button", "", "Sign out"); out.type = "button";
       out.addEventListener("click", function () { api.logout().then(function () { go("index.html"); }); });
@@ -142,7 +146,7 @@
   }
 
   /* the sign-in gate for pages that need an account */
-  var NEEDS_ACCOUNT = { messages: 1, friends: 1, admin: 1 };
+  var NEEDS_ACCOUNT = { messages: 1, friends: 1, admin: 1, reports: 1 };
   /* wait until every script has run: the real server can answer before pages.js is listening */
   var loaded = new Promise(function (done) { if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", done); } else { done(); } });
   Promise.all([api.me().catch(function () { return null; }), loaded]).then(function (r) {
