@@ -104,6 +104,8 @@
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") { menu.hidden = true; } });
       acct.appendChild(btn); acct.appendChild(menu);
     } else {
+      var join = el("a", "btn", "Create an account"); join.href = "auth.html?mode=register";
+      acct.appendChild(join);
       var login = el("a", "btn primary", "Sign in"); login.href = "auth.html";
       acct.appendChild(login);
     }
