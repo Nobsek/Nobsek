@@ -55,7 +55,7 @@
 
   /* the dock: four places */
   var DOCK = [["index.html", "Home", "home"], ["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"]];
-  var NAV = [["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"], ["updates.html", "Updates", "updates"], ["faq.html", "FAQ", "faq"]];
+  var NAV = [["play.html", "Play", "play"], ["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"], ["updates.html", "Updates", "updates"], ["faq.html", "FAQ", "faq"]];
   var ICONS = {
     home: '<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>',
     messages: '<path d="M4 5h16v11H9l-5 4z"/>',

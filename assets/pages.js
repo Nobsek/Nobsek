@@ -40,6 +40,7 @@
       [[st.players, "players"], [st.online, "online now"]].forEach(function (x) { var d = el("div"); d.appendChild(el("b", "", String(x[0]))); d.appendChild(el("span", "", x[1])); live.appendChild(d); });
     });
     var cta = el("div", "cta"); w.appendChild(cta);
+    var go = el("a", "btn primary big", "Play"); go.href = "play.html"; cta.appendChild(go);
     if (me) { var p = el("a", "btn primary big", "Open messages"); p.href = "messages.html"; cta.appendChild(p); }
     else { var r = el("a", "btn primary big", "Create an account"); r.href = "auth.html?mode=register"; cta.appendChild(r); var l = el("a", "btn big", "Sign in"); l.href = "auth.html"; cta.appendChild(l); }
     var how = el("section", "how"); var hw = el("div", "wrap"); how.appendChild(hw); s.parentNode.insertBefore(how, s.nextSibling);
@@ -387,6 +388,21 @@
     var w = section(); head(w, "FAQ", "Quick answers"); var f = el("div", "faq"); w.appendChild(f);
     FAQ.forEach(function (q) { var d = el("details"); d.appendChild(el("summary", "", q[0])); d.appendChild(el("p", "", Array.isArray(q[1]) ? q[1][0] : q[1])); f.appendChild(d); });
   };
+  /* PLAY: the list of game servers */
+  P.play = function (me) {
+    var w = section(); head(w, "Play", "Choose a server", "Pick a server to enter the game. Press Esc in the game to leave.");
+    var game = "https://nobsek-play.nobsek.workers.dev/";
+    var card = el("div", "notice"); card.appendChild(el("h3", "", "Main server"));
+    var count = el("p", "", "Checking the server..."); card.appendChild(count);
+    var join = el("a", "btn primary", "Join"); join.href = game + (me ? "?name=" + encodeURIComponent(me.username) : ""); card.appendChild(join); w.appendChild(card);
+    function refresh() {
+      fetch(game + "status", { cache: "no-store" }).then(function (r) { if (!r.ok) { throw new Error(); } return r.json(); })
+        .then(function (s) { count.textContent = s.online + " / " + s.max + " players" + (s.online >= s.max ? " (full)" : ""); },
+          function () { count.textContent = "Player count unavailable."; });
+    }
+    refresh(); setInterval(refresh, 10000);
+  };
+
   P.rules = function () {
     var w = section(); head(w, "Rules", "House rules", "Short and simple. Staff can remove anyone who breaks them.");
     html(w.appendChild(el("div", "prose")), "<ol><li><strong>Adults only.</strong> You must be 18 or older. Anyone who seems younger is removed.</li><li><strong>Consent.</strong> Only use characters, looks and avatars with their owner's agreement.</li><li><strong>Be kind.</strong> No harassment, hate or threats.</li><li><strong>No real people.</strong> Do not copy a real person's identity or photos.</li><li><strong>Keep your account private.</strong> Do not share your password.</li><li><strong>No false reports.</strong> Sending a false report gets you a warning.</li><li><strong>No cheating the shop.</strong> Do not abuse bugs to gain coins or VIP.</li></ol>");
