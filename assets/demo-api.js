@@ -34,7 +34,7 @@
       ],
       msgs: []
     };
-    var lines = [["Nobsek", "general", "Welcome! This is the demo of the site: accounts here stay in your browser."], ["Aria", "general", "Register to get the game link."], ["Kestrel", "looks", "Posting my look code later today."], ["Milo", "help", "Press G in game to take out the grab tool."], ["Kestrel", "vip", "Thanks for the support, everyone."]];
+    var lines = [["Nobsek", "general", "Welcome! This is the demo of the site: accounts here stay in your browser."], ["Aria", "general", "Say hello in General."], ["Kestrel", "looks", "Posting my look code later today."], ["Milo", "help", "Press G in game to take out the grab tool."], ["Kestrel", "vip", "Thanks for the support, everyone."]];
     lines.forEach(function (l, i) { d.msgs.push({ id: "m" + i, room: l[1], user: l[0], text: l[2], at: t - (lines.length - i) * h }); });
     save(d); return d;
   }
@@ -83,7 +83,6 @@
       });
     },
     logout: function () { try { localStorage.removeItem(SESSION); } catch (e) { /* ignore */ } return wait(true); },
-    gameLink: function () { return guard(function () { var m = need(load()), g = (window.NOBSEK && NOBSEK.links.game) || "https://www.roblox.com/games/YOUR-GAME-ID"; return g + (g.indexOf("?") < 0 ? "?" : "&") + "privateServerLinkCode=demo-" + m.id.slice(-6); }); },
     stats: function () { var d = load(); return wait({ players: d.users.length, online: d.users.filter(function (u) { return now() - u.last < 15 * 60000; }).length, vips: d.users.filter(isVip).length }); },
     players: function (q) { var d = load(); q = String(q || "").toLowerCase(); return wait(d.users.filter(function (u) { return !q || u.username.toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { return b.last - a.last; }).map(clean)); },
     player: function (name) { return guard(function () { var d = load(), u = byName(d, name); if (!u) { throw new Error("No such player."); } var m = current(d), o = clean(u); o.online = now() - u.last < 15 * 60000; o.friend = !!(m && m.friends.indexOf(u.id) >= 0); o.pending = !!(m && u.requests.indexOf(m.id) >= 0); o.self = !!(m && m.id === u.id); return o; }); },

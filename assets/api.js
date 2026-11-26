@@ -26,7 +26,6 @@
     register: function (f) { return call("POST", "/api/register", f).then(function (d) { setToken(d.token); return d.user; }); },
     login: function (f) { return call("POST", "/api/login", f).then(function (d) { setToken(d.token); return d.user; }); },
     logout: function () { var p = token() ? call("POST", "/api/logout", {}).catch(function () { return null; }) : Promise.resolve(); return p.then(function () { setToken(null); return true; }); },
-    gameLink: function () { return call("GET", "/api/game-link").then(function (u) { return u || (cfg.links && cfg.links.game) || ""; }); },
     stats: function () { return call("GET", "/api/stats"); },
     players: function (q) { return call("GET", "/api/players?q=" + enc(q || "")); },
     player: function (name) { return call("GET", "/api/player/" + enc(name)); },
@@ -45,9 +44,6 @@
     buy: function (id) { return call("POST", "/api/buy", { id: id }); },
     adminUsers: function () { return call("GET", "/api/admin/users"); },
     setRole: function (name, role) { return call("POST", "/api/admin/role", { name: name, role: role }); },
-    grantCoins: function (name, amount) { return call("POST", "/api/admin/coins", { name: name, amount: amount }); },
-    robloxStatus: function () { return call("GET", "/api/roblox"); },
-    robloxStart: function () { return call("POST", "/api/roblox/start", {}); },
-    robloxVerify: function (robloxName) { return call("POST", "/api/roblox/verify", { robloxName: robloxName }); }
+    grantCoins: function (name, amount) { return call("POST", "/api/admin/coins", { name: name, amount: amount }); }
   };
 })();

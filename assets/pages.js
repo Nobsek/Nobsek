@@ -41,26 +41,26 @@
       [[st.players, "players"], [st.online, "online now"], [st.vips, "VIP"]].forEach(function (x) { var d = el("div"); d.appendChild(el("b", "", String(x[0]))); d.appendChild(el("span", "", x[1])); live.appendChild(d); });
     });
     var cta = el("div", "cta"); w.appendChild(cta);
-    if (me) { var p = el("a", "btn primary big", "Get the game link"); p.href = "play.html"; cta.appendChild(p); }
+    if (me) { var p = el("a", "btn primary big", "Open messages"); p.href = "messages.html"; cta.appendChild(p); }
     else { var r = el("a", "btn primary big", "Create an account"); r.href = "auth.html?mode=register"; cta.appendChild(r); var l = el("a", "btn big", "Sign in"); l.href = "auth.html"; cta.appendChild(l); }
     var how = el("section", "how"); var hw = el("div", "wrap"); how.appendChild(hw); s.parentNode.insertBefore(how, s.nextSibling);
     hw.appendChild(el("h2", "", "How it works"));
     var st = el("div", "steps3"); hw.appendChild(st);
-    [["Create a free account", "Pick a username and confirm you are 18 or older. It takes a minute."], ["Get your game link", "Your private link opens Nobsek in Roblox. It is on the Play page, always."], ["Play and meet people", "Build your character, pick a scene, and chat with the community here."]].forEach(function (x) {
+    [["Create a free account", "Pick a username and confirm you are 18 or older. It takes a minute."], ["Set up your profile", "Write a short bio and choose your picture."], ["Meet people", "Chat with the community and add friends."]].forEach(function (x) {
       var c = el("div", "step"); c.appendChild(el("h3", "", x[0])); c.appendChild(el("p", "", x[1])); st.appendChild(c);
     });
     var doors = el("div", "doors"); hw.appendChild(doors);
     var ICON = {
-      play: '<path d="M8 5l11 7-11 7z"/>', chat: '<path d="M4 5h16v11H9l-5 4z"/>', people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6"/><path d="M16 5a3.5 3.5 0 010 7M18 14c2.5.6 3.5 2.6 3.5 6"/>',
+      chat: '<path d="M4 5h16v11H9l-5 4z"/>', people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6"/><path d="M16 5a3.5 3.5 0 010 7M18 14c2.5.6 3.5 2.6 3.5 6"/>',
       star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>', news: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-1 .7-1.5 1.2-1.5 2.5M12 17h.01"/>'
     };
-    [["play.html", "play", "Play", "Get your private link to the game"], ["messages.html", "chat", "Messages", "Chat rooms with other players"], ["players.html", "people", "Players", "Find people and add friends"],
+    [["messages.html", "chat", "Messages", "Chat rooms with other players"], ["players.html", "people", "Players", "Find people and add friends"],
       ["vip.html", "star", "VIP and coins", "Daily coins, shop, supporter perks"], ["updates.html", "news", "Updates", "Everything that changed"], ["faq.html", "help", "FAQ", "Quick answers"]].forEach(function (d) {
       var a = el("a", "door"); a.href = d[0]; var ic = el("span", "ico"); ic.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICON[d[1]] + "</svg>"; a.appendChild(ic);
       var t = el("span"); t.appendChild(el("strong", "", d[2])); t.appendChild(el("small", "", d[3])); a.appendChild(t); doors.appendChild(a);
     });
     var about = el("details", "about-box"); about.appendChild(el("summary", "", "What is Nobsek?"));
-    about.appendChild(el("p", "", "Nobsek is a Roblox experience with a character editor, a library of 300+ scenes, soft-body physics and a grab tool. This site is where you register to get the game link, chat, find friends and manage your VIP perks."));
+    about.appendChild(el("p", "", "Nobsek is a game with a character editor, a library of 300+ scenes, soft-body physics and a grab tool, running on the Nobsek engine. This site is where you chat, find friends and manage your VIP perks."));
     hw.appendChild(about);
     var links = el("div", "links"); hw.appendChild(links);
     if (cfg.links.discord) { var dl = el("a", "", "Discord"); dl.href = cfg.links.discord; dl.target = "_blank"; dl.rel = "noopener"; links.appendChild(dl); }
@@ -70,7 +70,7 @@
   /* SIGN IN / REGISTER */
   P.auth = function (me) {
     var w = el("div", "wrap"); var s = el("section", "center-page"); s.appendChild(w); app.appendChild(s);
-    if (me) { var next = qs("next"); if (next && !/^https?:|^\/\//.test(next)) { N.go(next); return; } N.go("play.html"); return; }
+    if (me) { var next = qs("next"); if (next && !/^https?:|^\/\//.test(next)) { N.go(next); return; } N.go("index.html"); return; }
     var card = el("div", "panel card-auth"); w.appendChild(card);
     var mode = qs("mode") === "register" ? "register" : "login";
     var seg = el("div", "seg"); seg.setAttribute("role", "tablist");
@@ -93,7 +93,7 @@
     function setMode(m) {
       mode = m; box.hidden = true; tl.setAttribute("aria-selected", String(m === "login")); tr.setAttribute("aria-selected", String(m === "register"));
       fMail.hidden = chk.hidden = m === "login"; go.textContent = m === "login" ? "Sign in" : "Create account"; $("#f-password").autocomplete = m === "login" ? "current-password" : "new-password";
-      forgot.textContent = m === "login" ? "Forgot your password? Password reset arrives with the server." : "After you register you get the game link.";
+      forgot.textContent = m === "login" ? "Forgot your password? Password reset arrives with the server." : "An account lets you chat and add friends.";
     }
     tl.addEventListener("click", function () { setMode("login"); }); tr.addEventListener("click", function () { setMode("register"); });
     setMode(mode);
@@ -102,44 +102,8 @@
       var f = { username: $("#f-username").value.trim(), email: $("#f-email").value.trim(), password: $("#f-password").value };
       if (mode === "register" && !cb.checked) { err(box, new Error("Please confirm you are 18 or older and accept the rules.")); return; }
       go.disabled = true;
-      (mode === "login" ? api.login(f) : api.register(f)).then(function () { var next = qs("next"); N.go(next && !/^https?:|^\/\//.test(next) ? next : "play.html"); }, function (x) { go.disabled = false; err(box, x); });
+      (mode === "login" ? api.login(f) : api.register(f)).then(function () { var next = qs("next"); N.go(next && !/^https?:|^\/\//.test(next) ? next : "index.html"); }, function (x) { go.disabled = false; err(box, x); });
     });
-  };
-
-  /* PLAY: the game link */
-  P.play = function (me) {
-    var w = section("narrow");
-    if (!me) { head(w, "Play", "Get the game link"); signedOutNotice(w, "Register for free to get your private link to the game."); return; }
-    head(w, "Play", "Your game link", "This link is yours. It opens Nobsek in Roblox. Do not share it.");
-    var card = el("div", "panel"); w.appendChild(card);
-    var row = el("div", "link-box"); var inp = el("input", "input"); inp.readOnly = true; inp.value = "Loading..."; inp.setAttribute("aria-label", "Your game link"); row.appendChild(inp);
-    var cp = el("button", "btn", "Copy"); cp.type = "button"; row.appendChild(cp); card.appendChild(row);
-    var open = el("a", "btn primary big", "Open the game"); open.style.marginTop = "16px"; open.target = "_blank"; open.rel = "noopener"; card.appendChild(open);
-    api.gameLink().then(function (url) { inp.value = url; open.href = url; cp.addEventListener("click", function () { N.copy(url); }); });
-    var steps = el("ol", "steps"); html(steps, "<li><b>Click Open the game.</b> Roblox opens on its own.</li><li><b>Sign in to Roblox</b> if it asks.</li><li><b>Press Play.</b> Your character editor is waiting.</li>"); card.appendChild(steps);
-    var note = el("div", "notice"); note.style.marginTop = "14px"; note.appendChild(el("p", "", "Demo mode: this link is only an example. The real one appears when the server is connected."));
-    if (api.demo) { w.appendChild(note); return; }
-
-    /* link your Roblox account so the game knows you are registered */
-    var rb = el("div", "panel"); rb.style.marginTop = "14px"; w.appendChild(rb);
-    rb.appendChild(el("h3", "", "Link your Roblox account"));
-    var rbBody = el("div"); rb.appendChild(rbBody);
-    function drawRoblox() {
-      api.robloxStatus().then(function (s) {
-        rbBody.textContent = "";
-        if (s.linked) { rbBody.appendChild(el("p", "ok", "Linked to " + s.robloxName + ". You are ready to play.")); rbBody.firstChild.style.marginTop = "12px"; return; }
-        rbBody.appendChild(el("p", "muted", "The game only lets in registered members. Link your Roblox account once: it takes a minute."));
-        var start = el("button", "btn primary", s.code ? "Get a new code" : "Start"); start.type = "button"; start.style.marginTop = "12px"; rbBody.appendChild(start);
-        start.addEventListener("click", function () { api.robloxStart().then(drawRoblox, function (x) { N.toast(x.message); }); });
-        if (!s.code) { return; }
-        var ol = el("ol", "steps"); html(ol, "<li>Copy this code: <b></b></li><li>Paste it anywhere in the <b>About</b> text of your Roblox profile and save.</li><li>Type your Roblox username below and press Verify. You can remove the code afterwards.</li>");
-        ol.querySelector("b").textContent = s.code; rbBody.appendChild(ol);
-        var row = el("div", "link-box"); var name = el("input", "input"); name.placeholder = "Your Roblox username"; name.setAttribute("aria-label", "Roblox username"); row.appendChild(name);
-        var ver = el("button", "btn primary", "Verify"); ver.type = "button"; row.appendChild(ver); rbBody.appendChild(row);
-        ver.addEventListener("click", function () { ver.disabled = true; api.robloxVerify(name.value).then(function () { N.toast("Linked"); drawRoblox(); }, function (x) { ver.disabled = false; N.toast(x.message); }); });
-      }, function () { rbBody.textContent = "Could not load."; });
-    }
-    drawRoblox();
   };
 
   /* MESSAGES */
@@ -319,13 +283,11 @@
 
   /* TEXT PAGES */
   var FAQ = [
-    ["Do I need an account to play?", "Yes, but only to get the game link. Register here, then open the link: the game itself runs in Roblox, not in the browser."],
+    ["Why create an account?", "To chat in Messages, add friends and use your coins and VIP perks."],
     ["Is it free?", "Yes. VIP is optional and only adds cosmetic perks."],
     ["Who can play?", "Adults only (18+). The game and this site are not for minors."],
     ["How do I get VIP?", "Support Nobsek on Patreon, or buy a VIP pass with coins in the VIP shop."],
     ["How do I earn coins?", "Claim your daily coins on the VIP page."],
-    ["I lost my game link.", "Open the Play page again: your link is always there."],
-    ["Which keys does the game use?", ["G takes out the grab tool. Number keys 1 to 5 jump between pages on this site, and H hides the dock."]],
     ["How do I report someone?", "Tell a moderator in Messages or on Discord. See the rules."]
   ];
   P.faq = function () {
@@ -334,7 +296,7 @@
   };
   P.rules = function () {
     var w = section(); head(w, "Rules", "House rules", "Short and simple. Staff can remove anyone who breaks them.");
-    html(w.appendChild(el("div", "prose")), "<ol><li><strong>Adults only.</strong> You must be 18 or older. Anyone who seems younger is removed.</li><li><strong>Consent.</strong> Only use characters, looks and avatars with their owner's agreement.</li><li><strong>Be kind.</strong> No harassment, hate or threats.</li><li><strong>No real people.</strong> Do not copy a real person's identity or photos.</li><li><strong>Keep your link private.</strong> Do not share your game link. Sharing it can get your account closed.</li><li><strong>No cheating the shop.</strong> Do not abuse bugs to gain coins or VIP.</li></ol>");
+    html(w.appendChild(el("div", "prose")), "<ol><li><strong>Adults only.</strong> You must be 18 or older. Anyone who seems younger is removed.</li><li><strong>Consent.</strong> Only use characters, looks and avatars with their owner's agreement.</li><li><strong>Be kind.</strong> No harassment, hate or threats.</li><li><strong>No real people.</strong> Do not copy a real person's identity or photos.</li><li><strong>Keep your account private.</strong> Do not share your password.</li><li><strong>No cheating the shop.</strong> Do not abuse bugs to gain coins or VIP.</li></ol>");
   };
   P.terms = function () {
     var w = section(); head(w, "Terms", "Terms of use", "Last updated 2026-11-22.");

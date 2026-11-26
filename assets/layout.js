@@ -53,12 +53,11 @@
   }
   window.N = { $: $, $$: $$, el: el, ago: ago, avatar: avatar, fillAvatar: fillAvatar, badges: badges, toast: toast, go: go, copy: copy, cfg: cfg, remember: remember, me: null };
 
-  /* the dock: five places, keys 1 to 5, H hides it */
-  var DOCK = [["index.html", "Home", "home"], ["play.html", "Play", "play"], ["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"]];
-  var NAV = [["play.html", "Play", "play"], ["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"], ["updates.html", "Updates", "updates"], ["faq.html", "FAQ", "faq"]];
+  /* the dock: four places */
+  var DOCK = [["index.html", "Home", "home"], ["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"]];
+  var NAV = [["messages.html", "Messages", "messages"], ["players.html", "Players", "players"], ["vip.html", "VIP", "vip"], ["updates.html", "Updates", "updates"], ["faq.html", "FAQ", "faq"]];
   var ICONS = {
     home: '<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>',
-    play: '<path d="M8 5l11 7-11 7z"/>',
     messages: '<path d="M4 5h16v11H9l-5 4z"/>',
     players: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6"/><path d="M16 5a3.5 3.5 0 010 7M18 14c2.5.6 3.5 2.6 3.5 6"/>',
     vip: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'
@@ -91,7 +90,6 @@
       function item(text, href) { var a = el("a", "", text); a.href = href; menu.appendChild(a); }
       item("My profile", "player.html?name=" + encodeURIComponent(me.username));
       item("Friends", "friends.html");
-      item("Get the game link", "play.html");
       item("VIP and coins", "vip.html");
       if (me.role === "admin" || me.role === "owner") { item("Admin", "admin.html"); }
       var out = el("button", "", "Sign out"); out.type = "button";
@@ -144,7 +142,7 @@
   }
 
   /* the sign-in gate for pages that need an account */
-  var NEEDS_ACCOUNT = { play: 1, messages: 1, friends: 1, admin: 1 };
+  var NEEDS_ACCOUNT = { messages: 1, friends: 1, admin: 1 };
   api.me().catch(function () { return null; }).then(function (me) {
     build(me);
     if (NEEDS_ACCOUNT[page] && !me) { document.dispatchEvent(new CustomEvent("nobsek-signedout")); }

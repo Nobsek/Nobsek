@@ -2,7 +2,7 @@
 // The counters (updates, changes, since) and the LATEST badge are worked out by the page: nothing else to edit.
 // "news" is the banner at the top of the site (leave it empty to hide it). "next" is the "Working on next" list.
 window.NOBSEK_UPDATES = {
-  news: "New: a website with accounts. Register to get the game link.",
+  news: "",
   next: [
     "Roles and VIP for supporters",
     "Share your look code on the site",
