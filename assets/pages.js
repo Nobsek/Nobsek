@@ -239,6 +239,7 @@
     var w = section(); head(w, "Updates", "What changed", "Every update to Nobsek, newest first.");
     var entries = (upd.entries || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }), changes = 0;
     var G = [["new", "NEW"], ["tweaks", "TWEAKS"], ["fixes", "FIXES"]];
+    if (!entries.length && !(upd.next || []).length) { var none = el("div", "notice"); none.appendChild(el("p", "", "No updates yet. The game is not out yet.")); w.appendChild(none); return; }
     entries.forEach(function (e) { G.forEach(function (g) { changes += (e[g[0]] || []).length; }); });
     var cs = el("div", "counters"); w.appendChild(cs);
     [[String(entries.length), "updates"], [String(changes), "changes"], [entries.length ? pdate(entries[entries.length - 1].date).toLocaleDateString("en-US", { month: "long", day: "numeric" }) : "-", "since"]].forEach(function (x) { var c = el("div", "counter"); c.appendChild(el("b", "", x[0])); c.appendChild(el("span", "", x[1])); cs.appendChild(c); });
