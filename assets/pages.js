@@ -247,7 +247,7 @@
   };
 
   /* REPORTS */
-  var REASONS = [["harassment", "Harassment, hate or threats"], ["spam", "Spam or scam"], ["underage", "Seems under 18"], ["impersonation", "Pretends to be someone else"], ["other", "Something else"]];
+  var REASONS = [["harassment", "Harassment, hate or threats"], ["spam", "Spam or scam"], ["underage", "Seems under 18"], ["other", "Something else"]];
   var ROOM_NAMES = { general: "General", vip: "VIP lounge" };
   function reasonText(id) { var r = REASONS.filter(function (x) { return x[0] === id; })[0]; return r ? r[1] : id; }
   function when(t) { return new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
@@ -259,6 +259,7 @@
     var sel = el("select", "select"); sel.id = "report-reason"; REASONS.forEach(function (r) { var o = el("option", "", r[1]); o.value = r[0]; sel.appendChild(o); }); f.appendChild(sel);
     var l2 = el("label", "label", "Details (optional)"); l2.htmlFor = "report-details"; f.appendChild(l2);
     var ta = el("textarea", "textarea"); ta.id = "report-details"; ta.maxLength = 500; f.appendChild(ta);
+    f.appendChild(el("p", "report-warn", "False reports are not allowed. If you send one, you will get a warning."));
     var box = el("div", "error"); box.hidden = true; box.setAttribute("role", "alert"); f.appendChild(box);
     var row = el("div", "actions-row"); var ok = el("button", "btn primary", "Send report"); ok.type = "submit"; row.appendChild(ok); row.appendChild(button("Cancel", "", function () { d.close(); })); f.appendChild(row);
     f.addEventListener("submit", function (e) {
@@ -380,7 +381,7 @@
     ["Who can play?", "Adults only (18+). The game and this site are not for minors."],
     ["How do I get VIP?", "Support Nobsek on Patreon, or buy a VIP pass with coins in the VIP shop."],
     ["How do I earn coins?", "Claim your daily coins on the VIP page."],
-    ["How do I report someone?", "Press Report next to their message, or on their profile. Staff review every report."]
+    ["How do I report someone?", "Press Report next to their message, or on their profile. Staff review every report. A false report gets you a warning."]
   ];
   P.faq = function () {
     var w = section(); head(w, "FAQ", "Quick answers"); var f = el("div", "faq"); w.appendChild(f);
@@ -388,7 +389,7 @@
   };
   P.rules = function () {
     var w = section(); head(w, "Rules", "House rules", "Short and simple. Staff can remove anyone who breaks them.");
-    html(w.appendChild(el("div", "prose")), "<ol><li><strong>Adults only.</strong> You must be 18 or older. Anyone who seems younger is removed.</li><li><strong>Consent.</strong> Only use characters, looks and avatars with their owner's agreement.</li><li><strong>Be kind.</strong> No harassment, hate or threats.</li><li><strong>No real people.</strong> Do not copy a real person's identity or photos.</li><li><strong>Keep your account private.</strong> Do not share your password.</li><li><strong>No cheating the shop.</strong> Do not abuse bugs to gain coins or VIP.</li></ol>");
+    html(w.appendChild(el("div", "prose")), "<ol><li><strong>Adults only.</strong> You must be 18 or older. Anyone who seems younger is removed.</li><li><strong>Consent.</strong> Only use characters, looks and avatars with their owner's agreement.</li><li><strong>Be kind.</strong> No harassment, hate or threats.</li><li><strong>No real people.</strong> Do not copy a real person's identity or photos.</li><li><strong>Keep your account private.</strong> Do not share your password.</li><li><strong>No false reports.</strong> Sending a false report gets you a warning.</li><li><strong>No cheating the shop.</strong> Do not abuse bugs to gain coins or VIP.</li></ol>");
   };
   P.terms = function () {
     var w = section(); head(w, "Terms", "Terms of use", "Last updated 2026-11-22.");

@@ -305,3 +305,4 @@ section.page.narrow { max-width: 620px; margin-inline: auto; width: 100%; }
 .report-msg time { color: var(--muted); font-size: 12px; font-weight: 400; }
 .report-msg .btn { margin-left: auto; }
 .report-msg .body { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.report-warn { margin: 14px 0 0; padding: 10px 12px; border: 1px solid rgba(255, 214, 102, 0.35); border-radius: var(--r-control); background: rgba(255, 214, 102, 0.08); color: #ffd666; font-size: 14px; }
