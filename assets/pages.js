@@ -412,30 +412,15 @@
   /* PLAY: the list of game servers */
   P.play = function (me) {
     var w = section(); head(w, "Play", "Choose a server", "Pick a server to enter the game. Press Esc in the game to leave.");
-    var game = "game/index.html";
     var ws = (window.NOBSEK && window.NOBSEK.ws) || "";
     var avatarApi = (window.NOBSEK && window.NOBSEK.avatarApi) || "";
     var card = el("div", "notice"); card.appendChild(el("h3", "", "Main server"));
-    var count = el("p", "", "Your skin loads automatically when the game starts. Change the name above to use another one."); card.appendChild(count);
-    var join = el("a", "btn primary", "Join");
-    var avatar = el("input", "input"); avatar.type = "text"; avatar.placeholder = "Avatar username or numeric id (optional)";
-    var saved = ""; try { saved = localStorage.getItem("nobsek-last-avatar") || ""; } catch (e) { /* ignore */ }
-    avatar.value = saved || (me ? me.username : ""); avatar.setAttribute("aria-label", "Avatar username or id");
-    card.appendChild(avatar); card.appendChild(join); w.appendChild(card);
-    function updateJoin() {
-      var who = avatar.value.trim() || (me ? me.username : "");
-      var q = [];
-      if (who) q.push("name=" + encodeURIComponent(who));
-      if (ws) q.push("ws=" + encodeURIComponent(ws));
-      if (avatarApi) q.push("api=" + encodeURIComponent(avatarApi));
-      join.href = game + (q.length ? "?" + q.join("&") : "");
-    }
-    avatar.addEventListener("input", function () {
-      try { localStorage.setItem("nobsek-last-avatar", avatar.value.trim()); } catch (e) { /* ignore */ }
-      updateJoin();
-    });
-    updateJoin();
-    updateJoin();
+    card.appendChild(el("p", "", "In the game, press Enter and type a username to load a skin."));
+    var q = [];
+    if (ws) q.push("ws=" + encodeURIComponent(ws));
+    if (avatarApi) q.push("api=" + encodeURIComponent(avatarApi));
+    var join = el("a", "btn primary", "Join"); join.href = "game/index.html" + (q.length ? "?" + q.join("&") : "");
+    card.appendChild(join); w.appendChild(card);
   };
 
   P.rules = function () {
