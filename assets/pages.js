@@ -416,9 +416,11 @@
     var ws = (window.NOBSEK && window.NOBSEK.ws) || "";
     var avatarApi = (window.NOBSEK && window.NOBSEK.avatarApi) || "";
     var card = el("div", "notice"); card.appendChild(el("h3", "", "Main server"));
-    var count = el("p", "", "Web version — click Join, then press Enter in game to load your avatar."); card.appendChild(count);
+    var count = el("p", "", "Your skin loads automatically when the game starts. Change the name above to use another one."); card.appendChild(count);
     var join = el("a", "btn primary", "Join");
-    var avatar = el("input", "input"); avatar.type = "text"; avatar.placeholder = "Avatar username or numeric id (optional)"; avatar.value = me ? me.username : ""; avatar.setAttribute("aria-label", "Avatar username or id");
+    var avatar = el("input", "input"); avatar.type = "text"; avatar.placeholder = "Avatar username or numeric id (optional)";
+    var saved = ""; try { saved = localStorage.getItem("nobsek-last-avatar") || ""; } catch (e) { /* ignore */ }
+    avatar.value = saved || (me ? me.username : ""); avatar.setAttribute("aria-label", "Avatar username or id");
     card.appendChild(avatar); card.appendChild(join); w.appendChild(card);
     function updateJoin() {
       var who = avatar.value.trim() || (me ? me.username : "");
@@ -428,7 +430,11 @@
       if (avatarApi) q.push("api=" + encodeURIComponent(avatarApi));
       join.href = game + (q.length ? "?" + q.join("&") : "");
     }
-    avatar.addEventListener("input", updateJoin);
+    avatar.addEventListener("input", function () {
+      try { localStorage.setItem("nobsek-last-avatar", avatar.value.trim()); } catch (e) { /* ignore */ }
+      updateJoin();
+    });
+    updateJoin();
     updateJoin();
   };
 
