@@ -47,6 +47,7 @@
     reports: function (status) { return call("GET", "/api/reports?status=" + enc(status || "open")); },
     reportDetail: function (id) { return call("GET", "/api/reports/" + enc(id)); },
     closeReport: function (id, status, note) { return call("POST", "/api/reports/" + enc(id), { status: status, note: note }); },
+    deleteUser: function (name) { return call("POST", "/api/admin/delete", { name: name }); },
     setBan: function (name, banned) { return call("POST", "/api/admin/ban", { name: name, banned: banned }); },
     warn: function (name, reason) { return call("POST", "/api/mod/warn", { name: name, reason: reason }); },
     warningSeen: function (id) { return call("POST", "/api/warnings/seen", { id: id }); },

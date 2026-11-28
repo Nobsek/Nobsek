@@ -289,11 +289,17 @@
     document.body.appendChild(d); d.showModal();
   }
   function modButtons(row, u, me, done, cls) {
-    if (!api.warn || u.username === me.username || rank(me.role) <= rank(u.role)) { return; }
+    if (!api.warn || u.deleted || u.username === me.username || rank(me.role) <= rank(u.role)) { return; }
     row.appendChild(button("Warn", cls, function () { warnDialog(u.username, "", done); }));
     if (rank(me.role) >= 2) {
       row.appendChild(button(u.banned ? "Unban" : "Ban", cls, function () {
         if (confirm(u.banned ? "Unban " + u.username + " and their connection?" : "Ban " + u.username + " and their connection (IP)? Other people on the same connection will be blocked too.")) { api.setBan(u.username, !u.banned).then(function () { N.toast(u.banned ? "Unbanned" : "Banned"); done(); }, function (x) { N.toast(x.message); }); }
+      }));
+    }
+    if (api.deleteUser && me.role === "owner") {
+      row.appendChild(button("Delete account", cls, function () {
+        if (!confirm("Delete the account " + u.username + " for good?\n\nTheir profile, friends, coins, messages and warnings will be erased. This cannot be undone.")) { return; }
+        api.deleteUser(u.username).then(function () { N.toast(u.username + " deleted"); if (/player\.html/.test(location.pathname)) { N.go("players.html"); } else { done(); } }, function (x) { N.toast(x.message); });
       }));
     }
   }
