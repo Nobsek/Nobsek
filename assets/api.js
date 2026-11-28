@@ -26,6 +26,7 @@
     register: function (f) { return call("POST", "/api/register", f).then(function (d) { setToken(d.token); return d.user; }); },
     login: function (f) { return call("POST", "/api/login", f).then(function (d) { setToken(d.token); return d.user; }); },
     logout: function () { var p = token() ? call("POST", "/api/logout", {}).catch(function () { return null; }) : Promise.resolve(); return p.then(function () { setToken(null); return true; }); },
+    deleteAccount: function (password) { return call("POST", "/api/account/delete", { password: password }).then(function () { setToken(null); return true; }); },
     stats: function () { return call("GET", "/api/stats"); },
     players: function (q) { return call("GET", "/api/players?q=" + enc(q || "")); },
     player: function (name) { return call("GET", "/api/player/" + enc(name)); },

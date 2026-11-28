@@ -81,6 +81,17 @@
       });
     },
     logout: function () { try { localStorage.removeItem(SESSION); } catch (e) { /* ignore */ } return wait(true); },
+    deleteAccount: function (password) {
+      return guard(function () {
+        var d = load(), m = need(d);
+        return hash(password).then(function (hs) {
+          if (hs !== m.hash) { throw new Error("Wrong password."); }
+          d.users = d.users.filter(function (u) { return u.id !== m.id; });
+          d.users.forEach(function (u) { u.friends = (u.friends || []).filter(function (i) { return i !== m.id; }); u.requests = (u.requests || []).filter(function (i) { return i !== m.id; }); });
+          save(d); try { localStorage.removeItem(SESSION); } catch (e) { /* ignore */ } return true;
+        });
+      });
+    },
     stats: function () { var d = load(); return wait({ players: d.users.length, online: d.users.filter(function (u) { return now() - u.last < 15 * 60000; }).length, vips: d.users.filter(isVip).length }); },
     players: function (q) { var d = load(); q = String(q || "").toLowerCase(); return wait(d.users.filter(function (u) { return !q || u.username.toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { return b.last - a.last; }).map(clean)); },
     player: function (name) { return guard(function () { var d = load(), u = byName(d, name); if (!u) { throw new Error("No such player."); } var m = current(d), o = clean(u); o.online = now() - u.last < 15 * 60000; o.friend = !!(m && m.friends.indexOf(u.id) >= 0); o.pending = !!(m && u.requests.indexOf(m.id) >= 0); o.self = !!(m && m.id === u.id); return o; }); },

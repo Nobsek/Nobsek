@@ -179,6 +179,13 @@
         else { form.appendChild(el("p", "hint", "Avatar colour: buy it in the VIP shop.")); }
         var save = el("button", "btn primary", "Save"); save.type = "submit"; save.style.marginTop = "14px"; form.appendChild(save); card.appendChild(form);
         form.addEventListener("submit", function (e) { e.preventDefault(); api.updateProfile({ bio: ta.value, hue: hue }).then(function () { N.toast("Saved"); }, function (x) { N.toast(x.message); }); });
+        if (api.deleteAccount && u.role !== "owner") {
+          var dz = el("form"); dz.style.marginTop = "28px"; dz.appendChild(el("p", "label", "Delete my account"));
+          dz.appendChild(el("p", "hint", "This removes your profile, friends, coins and chat messages for good. It cannot be undone."));
+          var pw = el("input", "input"); pw.type = "password"; pw.autocomplete = "current-password"; pw.placeholder = "Your password"; pw.setAttribute("aria-label", "Your password"); pw.required = true; pw.style.marginTop = "10px"; dz.appendChild(pw);
+          var del = el("button", "btn", "Delete my account"); del.type = "submit"; del.style.marginTop = "10px"; del.style.color = "#ff6b6b"; dz.appendChild(del); card.appendChild(dz);
+          dz.addEventListener("submit", function (e) { e.preventDefault(); if (!window.confirm("Delete your account for good? This cannot be undone.")) { return; } del.disabled = true; api.deleteAccount(pw.value).then(function () { N.go("index.html"); }, function (x) { del.disabled = false; N.toast(x.message); }); });
+        }
       } else if (me) {
         var fb = el("button", "btn primary", u.friend ? "Friends ✓" : u.pending ? "Request sent" : "Add friend"); fb.type = "button"; fb.disabled = u.friend || u.pending;
         fb.addEventListener("click", function () { api.addFriend(u.username).then(function (r) { fb.textContent = r === "accepted" ? "Friends ✓" : "Request sent"; fb.disabled = true; }, function (x) { N.toast(x.message); }); }); act.appendChild(fb);
